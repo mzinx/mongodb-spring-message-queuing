@@ -10,13 +10,13 @@
 	</parent>
 
 	<groupId>com.mzinx</groupId>
-	<artifactId>mongodb-spring-discovery</artifactId>
-	<version>0.0.3</version>
+	<artifactId>mongodb-spring-message-queuing</artifactId>
+	<version>0.0.1</version>
     <packaging>jar</packaging>
 
-	<name>mongodb-spring-discovery</name>
-	<description>MongoDB Spring extension for instance discovery</description>
-	<url>https://github.com/mzinx/mongodb-spring-discovery</url>
+	<name>mongodb-spring-message-queuing</name>
+	<description>MongoDB Spring extension for message queuing</description>
+	<url>https://github.com/mzinx/mongodb-spring-message-queuing</url>
 	
     <licenses>
         <license>
@@ -35,9 +35,9 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git://github.com/mzinx/mongodb-spring-discovery.git</connection>
-        <developerConnection>scm:git:ssh://github.com:mzinx/mongodb-spring-discovery.git</developerConnection>
-        <url>https://github.com/mzinx/mongodb-spring-discovery/tree/main</url>
+        <connection>scm:git:git://github.com/mzinx/mongodb-spring-message-queuing.git</connection>
+        <developerConnection>scm:git:ssh://github.com:mzinx/mongodb-spring-message-queuing.git</developerConnection>
+        <url>https://github.com/mzinx/mongodb-spring-message-queuing/tree/main</url>
         <tag>HEAD</tag>
     </scm>
 	<dependencies>
