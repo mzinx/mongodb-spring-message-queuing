@@ -14,7 +14,7 @@
 	<version>0.0.3</version>
     <packaging>jar</packaging>
 
-	<name>mongodb-spring-message-queuing</name>
+	<name>MongoDB Spring Message Queuing</name>
 	<description>MongoDB Spring extension for message queuing</description>
 	<url>https://github.com/mzinx/mongodb-spring-message-queuing</url>
 	
