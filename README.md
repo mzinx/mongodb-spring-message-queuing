@@ -97,18 +97,6 @@ stompClient.connect({}, function(frame) {
 });
 ```
 
-#### Server-side (Spring)
-
-```java
-@Autowired
-private SimpMessagingTemplate messagingTemplate;
-
-public void sendNotification(String userId, String message) {
-    messagingTemplate.convertAndSendToUser(userId, "/queue/notifications", 
-        new Notification(message));
-}
-```
-
 ### Message Types
 
 The library supports three message types:
@@ -149,54 +137,11 @@ stompClient.subscribe('/sync', function(message) {
 });
 ```
 
-### Custom Message Handling
-
-```java
-@Controller
-public class CustomMessageController {
-    
-    @Autowired
-    private MessageService messageService;
-    
-    @MessageMapping("/custom")
-    public void handleCustomMessage(Message message) {
-        // Process custom message
-        System.out.println("Received: " + message.getContent());
-        
-        // Send response
-        Message response = Message.builder()
-            .type(Message.Type.RES)
-            .target("/custom-response")
-            .content(new Document("status", "processed"))
-            .build();
-            
-        messageService.send(response);
-    }
-}
-```
-
-### Direct Message Sending
-
-```java
-@Autowired
-private MessageService messageService;
-
-public void broadcastAnnouncement(String announcement) {
-    Message message = Message.builder()
-        .type(Message.Type.RES)
-        .target("/announcements")
-        .content(new Document("text", announcement).append("timestamp", new Date()))
-        .build();
-        
-    messageService.send(message);
-}
-```
-
 ## Architecture
 
 ### Message Flow
 
-1. **Client** sends message via WebSocket to `/app/push`
+1. **Client** sends message via WebSocket to `/push`
 2. **MessageController** receives message and calls `messageService.queue()`
 3. **MessageService** saves message to MongoDB with TTL
 4. **Change Stream** detects new message insertion
@@ -214,7 +159,7 @@ public void broadcastAnnouncement(String announcement) {
 ## WebSocket Endpoints
 
 - **`/ws`** - Main WebSocket endpoint (SockJS fallback available)
-- **`/app/push`** - Endpoint for sending messages to queue
+- **`/push`** - Endpoint for sending messages to queue
 - **`/cmd`** - Subscription endpoint for command messages
 - **`/sync`** - Subscription endpoint for synchronization messages
 
@@ -225,65 +170,6 @@ Messages are stored in MongoDB with automatic TTL-based cleanup:
 - Messages expire after `messaging.maxLifeTime` milliseconds
 - TTL index ensures automatic cleanup of old messages
 - Failed deliveries can be retried from persistent storage
-
-## Integration Examples
-
-### With Spring Security
-
-```java
-@Configuration
-public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-    
-    @Override
-    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-        messages
-            .simpDestMatchers("/app/push").authenticated()
-            .anyMessage().permitAll();
-    }
-}
-```
-
-### With User Destinations
-
-```java
-// Send to specific user
-messagingTemplate.convertAndSendToUser(userId, "/queue/messages", message);
-
-// Client subscribes to user-specific queue
-stompClient.subscribe('/user/queue/messages', callback);
-```
-
-## Monitoring and Debugging
-
-Enable debug logging to monitor messaging operations:
-
-```properties
-logging.level.com.mzinx.mongodb.messaging=DEBUG
-logging.level.org.springframework.messaging=DEBUG
-```
-
-## Best Practices
-
-### Message Design
-
-- Keep messages small and focused
-- Use appropriate message types (REQ/ACK/RES)
-- Include timestamps for ordering
-- Use descriptive target paths
-
-### Performance Considerations
-
-- Configure appropriate TTL values based on message volume
-- Monitor WebSocket connection limits
-- Use message batching for high-frequency updates
-- Consider pagination for large data syncs
-
-### Security
-
-- Implement authentication for WebSocket connections
-- Validate message content and targets
-- Use HTTPS for production deployments
-- Rate limit message sending
 
 ## License
 
