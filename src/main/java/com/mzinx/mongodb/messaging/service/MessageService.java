@@ -63,7 +63,7 @@ public class MessageService {
 						.name(INDEX_NAME));
 		this.cs = ChangeStream.of("message-service", Mode.BOARDCAST,
 				List.of());
-		changeStreamService.run(
+		changeStreamService.start(
 				ChangeStreamRegistry.<Document>builder().collectionName(messagingProperties.getCollection()).body(e -> {
 					try {
 						if (OperationType.INSERT == e.getOperationType()) {
