@@ -49,7 +49,7 @@ public class LiveDataService {
 					List.of(Aggregates
 							.match(Filters.in("ns.coll",
 									messagingProperties.getWatchCollections()))));
-			this.changeStreamService.run(ChangeStreamRegistry.<Document>builder().body(e -> {
+			this.changeStreamService.start(ChangeStreamRegistry.<Document>builder().body(e -> {
 				try {
 					logger.info("{} operation on Document {} in collection {}, send refresh command",
 							e.getOperationType().getValue(),
