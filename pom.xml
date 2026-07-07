@@ -11,7 +11,7 @@
 
 	<groupId>com.mzinx</groupId>
 	<artifactId>mongodb-spring-message-queuing</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
     <packaging>jar</packaging>
 
 	<name>MongoDB Spring Message Queuing</name>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>com.mzinx</groupId>
 			<artifactId>mongodb-spring-change-stream</artifactId>
-			<version>0.0.5</version>
+			<version>0.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -150,7 +150,6 @@
                     <quiet>true</quiet>
                 </configuration>
             </plugin>
-			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
