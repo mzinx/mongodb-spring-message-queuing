@@ -1,15 +1,18 @@
 package com.mzinx.mongodb.messaging.service;
 
+import java.util.List;
 
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.mzinx.mongodb.changestream.model.ChangeStream;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mzinx.mongodb.changestream.model.ChangeStream.Mode;
+import com.mzinx.mongodb.changestream.model.ChangeStreamConfig;
+import com.mzinx.mongodb.changestream.service.ChangeStreamConfigService;
 import com.mzinx.mongodb.messaging.config.MessagingProperties;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 
 @Service
 public class LiveDataService {
@@ -17,26 +20,30 @@ public class LiveDataService {
 
 	private final MessagingProperties messagingProperties;
 
-	private ChangeStream<Document> cs;
+	private final ChangeStreamConfigService changeStreamConfigService;
 
-	LiveDataService(MessagingProperties messagingProperties) {
+	LiveDataService(MessagingProperties messagingProperties, ChangeStreamConfigService changeStreamConfigService) {
 		this.messagingProperties = messagingProperties;
+		this.changeStreamConfigService = changeStreamConfigService;
 	}
 
 	@PostConstruct
 	private void init() {
-		// Live data 
-		
+		// Live data
+
 		if (messagingProperties.getWatchCollections() != null
 				&& messagingProperties.getWatchCollections().size() > 0) {
-						//TODO: inject to change stream config instead of self init
-			}
-	}
-
-	@PreDestroy
-	private void destroy() {
-		if (cs != null)
-			cs.setRunning(false);
+			changeStreamConfigService.save(ChangeStreamConfig.builder()
+					.id("live-data") // unique change stream id
+					.collectionName(messagingProperties.getCollection()) // collection to watch (null = whole database)
+					.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE
+					.pipeline(List.of(Aggregates
+							.match(Filters.in("ns.coll",
+									messagingProperties.getWatchCollections()))))
+					.listener("liveDataListener") // ChangeStreamListener bean name
+					.enabled(true)
+					.build());
+		}
 	}
 
 }

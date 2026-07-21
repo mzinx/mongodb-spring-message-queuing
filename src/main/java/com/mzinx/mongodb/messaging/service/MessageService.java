@@ -1,6 +1,7 @@
 package com.mzinx.mongodb.messaging.service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +11,15 @@ import org.springframework.stereotype.Controller;
 
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
-
+import com.mzinx.mongodb.changestream.model.ChangeStream.Mode;
+import com.mzinx.mongodb.changestream.model.ChangeStreamConfig;
+import com.mzinx.mongodb.changestream.service.ChangeStreamConfigService;
 import com.mzinx.mongodb.messaging.config.MessagingProperties;
 import com.mzinx.mongodb.messaging.dao.MessageRepository;
 import com.mzinx.mongodb.messaging.model.Message;
 import com.mzinx.mongodb.messaging.model.Message.Type;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 
 /**
  *
@@ -34,8 +36,12 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 
 	private final MongoTemplate mongoTemplate;
+	private final ChangeStreamConfigService changeStreamConfigService;
 
-	MessageService(MessagingProperties messagingProperties, SimpMessagingTemplate simpMessagingTemplate, MessageRepository messageRepository, MongoTemplate mongoTemplate) {
+	MessageService(ChangeStreamConfigService changeStreamConfigService, MessagingProperties messagingProperties,
+			SimpMessagingTemplate simpMessagingTemplate, MessageRepository messageRepository,
+			MongoTemplate mongoTemplate) {
+		this.changeStreamConfigService = changeStreamConfigService;
 		this.messagingProperties = messagingProperties;
 		this.simpMessagingTemplate = simpMessagingTemplate;
 		this.messageRepository = messageRepository;
@@ -47,7 +53,14 @@ public class MessageService {
 		mongoTemplate.getCollection(messagingProperties.getCollection()).createIndex(Indexes.descending(INDEX_KEY),
 				new IndexOptions().expireAfter(messagingProperties.getMaxLifeTime(), TimeUnit.MILLISECONDS)
 						.name(INDEX_NAME));
-						//TODO: inject to change stream config instead of self init
+		changeStreamConfigService.save(ChangeStreamConfig.builder()
+				.id("message-service") // unique change stream id
+				.collectionName(messagingProperties.getCollection()) // collection to watch (null = whole database)
+				.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE
+				.pipeline(List.of())
+				.listener("messageListener") // ChangeStreamListener bean name
+				.enabled(true)
+				.build());
 	}
 
 	public Message queue(Message message) {
