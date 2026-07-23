@@ -2,12 +2,11 @@ package com.mzinx.mongodb.messaging.service;
 
 import java.util.List;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
 import com.mzinx.mongodb.changestream.model.ChangeStream.Mode;
 import com.mzinx.mongodb.changestream.model.ChangeStreamConfig;
 import com.mzinx.mongodb.changestream.service.ChangeStreamConfigService;
@@ -35,11 +34,8 @@ public class LiveDataService {
 				&& messagingProperties.getWatchCollections().size() > 0) {
 			changeStreamConfigService.save(ChangeStreamConfig.builder()
 					.id("live-data") // unique change stream id
-					.collectionName(messagingProperties.getCollection()) // collection to watch (null = whole database)
-					.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE
-					.pipeline(List.of(Aggregates
-							.match(Filters.in("ns.coll",
-									messagingProperties.getWatchCollections()))))
+					.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE					
+                	.pipeline(List.of(new Document("$match", new Document("ns.coll",new Document("$in", messagingProperties.getWatchCollections())))))
 					.listener("liveDataListener") // ChangeStreamListener bean name
 					.enabled(true)
 					.build());
