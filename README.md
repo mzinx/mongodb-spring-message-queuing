@@ -8,7 +8,6 @@ A Spring Boot starter library that provides message queuing and real-time data s
 - **Real-time Messaging**: WebSocket-based instant message delivery using STOMP
 - **Live Data Synchronization**: Automatic propagation of database changes to connected clients
 - **Change Stream Integration**: Leverages MongoDB change streams for real-time data updates
-- **Request-Response Pattern**: Support for REQ/ACK/RES message types
 - **Configurable Endpoints**: Customizable WebSocket endpoints and message paths
 - **TTL Message Management**: Automatic expiration of old messages
 - **Spring Integration**: Seamless integration with Spring Boot and WebSocket
@@ -96,14 +95,6 @@ stompClient.connect({}, function(frame) {
     }));
 });
 ```
-
-### Message Types
-
-The library supports three message types:
-
-- **REQ**: Request messages sent by clients
-- **ACK**: Acknowledgment messages sent by server after queuing
-- **RES**: Response messages sent by server (automatic for queued messages)
 
 ### Live Data Synchronization
 
