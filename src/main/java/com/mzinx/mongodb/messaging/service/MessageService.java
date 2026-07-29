@@ -17,7 +17,6 @@ import com.mzinx.mongodb.changestream.service.ChangeStreamConfigService;
 import com.mzinx.mongodb.messaging.config.MessagingProperties;
 import com.mzinx.mongodb.messaging.dao.MessageRepository;
 import com.mzinx.mongodb.messaging.model.Message;
-import com.mzinx.mongodb.messaging.model.Message.Type;
 
 import jakarta.annotation.PostConstruct;
 
@@ -67,9 +66,7 @@ public class MessageService {
 		logger.info("Boarcast message received, append to the queue");
 		Date now = new Date();
 		message.setCreatedAt(now);
-		message.setType(null);
 		messageRepository.save(message);
-		message.setType(Type.ACK);
 		return message;
 	}
 
