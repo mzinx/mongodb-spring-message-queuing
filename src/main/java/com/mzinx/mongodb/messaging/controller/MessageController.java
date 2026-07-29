@@ -34,7 +34,7 @@ public class MessageController {
 	//@SendTo("/cmd") //no support to dynamic destinations, i.e. path from properties
 	public Message push(Message message) throws Exception {
 		message = messageService.queue(message);
-		template.convertAndSend(messagingProperties.getCommandPath(), message);
+		//template.convertAndSend(messagingProperties.getCommandPath(), message);
 		return message;
 	}
 

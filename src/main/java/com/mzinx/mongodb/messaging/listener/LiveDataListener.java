@@ -40,7 +40,7 @@ public class LiveDataListener<T> implements ChangeStreamListener<Document> {
 					switch (e.getOperationType()) {
 						case INSERT:
 						case REPLACE:
-							this.messageService.send(Message.builder().type(Message.Type.RES).target(messagingProperties.getSyncPath())
+							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
 									.content(e.getFullDocument())
 									.build());
 							break;
@@ -49,19 +49,19 @@ public class LiveDataListener<T> implements ChangeStreamListener<Document> {
 							BsonDocument document = new BsonDocument();
 							pojoCodecRegistry.get(UpdateDescription.class).encode(new BsonDocumentWriter(document),
 									updateDesc, EncoderContext.builder().build());
-							this.messageService.send(Message.builder().type(Message.Type.RES).target(messagingProperties.getSyncPath())
+							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
 									.content(new Document(document))
 									.build());
 							break;
 						case DELETE:
-							this.messageService.send(Message.builder().type(Message.Type.RES).target(messagingProperties.getSyncPath())
+							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
 									.content(new Document(e.getDocumentKey()))
 									.build());
 							break;
 						default:
 							break;
 					}
-					this.messageService.send(Message.builder().type(Message.Type.RES).target(messagingProperties.getCommandPath())
+					this.messageService.send(Message.builder().target(messagingProperties.getCommandPath())
 							.content(
 									new Document("type", "REFRESH").append("coll",
 											e.getNamespace().getCollectionName()))

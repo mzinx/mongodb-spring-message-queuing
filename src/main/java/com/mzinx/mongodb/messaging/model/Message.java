@@ -17,10 +17,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Document(collection = "#{@messagingProperties.collection}")
 public class Message {
-    public enum Type {
-        REQ, ACK, RES
-    }
-    private Type type;
 
     @Field("t")
     @BsonProperty("t")
