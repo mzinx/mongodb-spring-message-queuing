@@ -17,7 +17,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableConfigurationProperties(MessagingProperties.class)
 @ConditionalOnProperty(prefix = "messaging", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan("com.mzinx.mongodb.messaging")
-@Import(ScanRegistrar.class)
+@Import(AutoConfigurationPackageRegistrar.class)
 @EnableWebSocketMessageBroker
 public class MessagingAutoConfig implements WebSocketMessageBrokerConfigurer {
     private final Logger logger = LoggerFactory.getLogger(getClass());

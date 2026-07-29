@@ -15,7 +15,7 @@ import jakarta.annotation.PostConstruct;
 
 @Service
 public class LiveDataService {
-	Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final MessagingProperties messagingProperties;
 
@@ -34,7 +34,7 @@ public class LiveDataService {
 				&& messagingProperties.getWatchCollections().size() > 0) {
 			changeStreamConfigService.save(ChangeStreamConfig.builder()
 					.id("live-data") // unique change stream id
-					.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE					
+					.mode(Mode.BROADCAST) // BROADCAST, AUTO_RECOVER or AUTO_SCALE					
                 	.pipeline(List.of(new Document("$match", new Document("ns.coll",new Document("$in", messagingProperties.getWatchCollections())))))
 					.listener("liveDataListener") // ChangeStreamListener bean name
 					.enabled(true)

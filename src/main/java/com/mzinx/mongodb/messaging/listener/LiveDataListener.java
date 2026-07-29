@@ -18,8 +18,8 @@ import com.mzinx.mongodb.messaging.model.Message;
 import com.mzinx.mongodb.messaging.service.MessageService;
 
 @Component
-public class LiveDataListener<T> implements ChangeStreamListener<Document> {
-    Logger logger = LoggerFactory.getLogger(getClass());
+public class LiveDataListener implements ChangeStreamListener<Document> {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final CodecRegistry pojoCodecRegistry;
 	private final MessageService messageService;
@@ -31,40 +31,41 @@ public class LiveDataListener<T> implements ChangeStreamListener<Document> {
 		this.messagingProperties = messagingProperties;
 	}
 
-    public void execute(ChangeStreamDocument<Document> e) {
+    @Override
+    public void onEvent(ChangeStreamDocument<Document> event) {
 				try {
 					logger.info("{} operation on Document {} in collection {}, send refresh command",
-							e.getOperationType().getValue(),
-							e.getDocumentKey(),
-							e.getNamespace().getCollectionName());
-					switch (e.getOperationType()) {
+							event.getOperationType().getValue(),
+							event.getDocumentKey(),
+							event.getNamespace().getCollectionName());
+					switch (event.getOperationType()) {
 						case INSERT:
 						case REPLACE:
-							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
-									.content(e.getFullDocument())
+							this.messageService.broadcast(Message.builder().target(messagingProperties.getSyncPath())
+									.content(event.getFullDocument())
 									.build());
 							break;
 						case UPDATE:
-							UpdateDescription updateDesc = e.getUpdateDescription();
+							UpdateDescription updateDesc = event.getUpdateDescription();
 							BsonDocument document = new BsonDocument();
 							pojoCodecRegistry.get(UpdateDescription.class).encode(new BsonDocumentWriter(document),
 									updateDesc, EncoderContext.builder().build());
-							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
+							this.messageService.broadcast(Message.builder().target(messagingProperties.getSyncPath())
 									.content(new Document(document))
 									.build());
 							break;
 						case DELETE:
-							this.messageService.send(Message.builder().target(messagingProperties.getSyncPath())
-									.content(new Document(e.getDocumentKey()))
+							this.messageService.broadcast(Message.builder().target(messagingProperties.getSyncPath())
+									.content(new Document(event.getDocumentKey()))
 									.build());
 							break;
 						default:
 							break;
 					}
-					this.messageService.send(Message.builder().target(messagingProperties.getCommandPath())
+					this.messageService.broadcast(Message.builder().target(messagingProperties.getCommandPath())
 							.content(
 									new Document("type", "REFRESH").append("coll",
-											e.getNamespace().getCollectionName()))
+											event.getNamespace().getCollectionName()))
 							.build());
 				} catch (Exception ex) {
 					logger.error("Error publishing event.", ex);

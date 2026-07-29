@@ -14,8 +14,8 @@ import com.mzinx.mongodb.messaging.service.MessageService;
 
 
 /**
- *
- * @param <T>
+ * STOMP entry point of the message queue: receives messages on the push path,
+ * enqueues them and acknowledges to the command path.
  */
 @Controller
 public class MessageController {
@@ -33,7 +33,7 @@ public class MessageController {
 	@MessageMapping("#{@messagingProperties.pushPath}")
 	//@SendTo("/cmd") //no support to dynamic destinations, i.e. path from properties
 	public Message push(Message message) throws Exception {
-		message = messageService.queue(message);
+		message = messageService.enqueue(message);
 		//template.convertAndSend(messagingProperties.getCommandPath(), message);
 		return message;
 	}

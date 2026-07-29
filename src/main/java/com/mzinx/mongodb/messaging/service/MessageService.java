@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
@@ -21,10 +21,11 @@ import com.mzinx.mongodb.messaging.model.Message;
 import jakarta.annotation.PostConstruct;
 
 /**
- *
- * @param <T>
+ * Persists messages to the TTL-indexed message collection and broadcasts them
+ * to WebSocket subscribers; queued messages are fanned out through the
+ * {@code message-service} change stream.
  */
-@Controller
+@Service
 public class MessageService {
 	private static final String INDEX_KEY = "cAt";
 	private static final String INDEX_NAME = "ttl";
@@ -55,24 +56,31 @@ public class MessageService {
 		changeStreamConfigService.save(ChangeStreamConfig.builder()
 				.id("message-service") // unique change stream id
 				.collectionName(messagingProperties.getCollection()) // collection to watch (null = whole database)
-				.mode(Mode.BOARDCAST) // BOARDCAST, AUTO_RECOVER or AUTO_SCALE
+				.mode(Mode.BROADCAST) // BROADCAST, AUTO_RECOVER or AUTO_SCALE
 				.pipeline(List.of())
 				.listener("messageListener") // ChangeStreamListener bean name
 				.enabled(true)
 				.build());
 	}
 
-	public Message queue(Message message) {
-		logger.info("Boarcast message received, append to the queue");
+	/**
+	 * Appends the message to the persistent queue; delivery to the target
+	 * destination happens through the change stream on the message collection.
+	 */
+	public Message enqueue(Message message) {
+		logger.info("Broadcast message received, appending to the queue");
 		Date now = new Date();
 		message.setCreatedAt(now);
 		messageRepository.save(message);
 		return message;
 	}
 
-	public void send(Message message) {
+
+	/** Broadcasts the message to the WebSocket subscribers of its target destination. */
+	public void broadcast(Message message) {
 		this.simpMessagingTemplate.convertAndSend(message.getTarget(),
 				message);
 	}
+
 
 }

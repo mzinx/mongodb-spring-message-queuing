@@ -20,7 +20,7 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.mzinx</groupId>
     <artifactId>mongodb-spring-message-queuing</artifactId>
-    <version>0.0.3</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -30,7 +30,7 @@ Also add the change stream dependency for live data features:
 <dependency>
     <groupId>com.mzinx</groupId>
     <artifactId>mongodb-spring-change-stream</artifactId>
-    <version>0.0.3</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
