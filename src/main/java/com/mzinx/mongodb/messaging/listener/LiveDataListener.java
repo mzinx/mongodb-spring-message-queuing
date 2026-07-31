@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.UpdateDescription;
 import com.mzinx.mongodb.changestream.listener.ChangeStreamListener;
+import com.mzinx.mongodb.messaging.command.CommandMessages;
 import com.mzinx.mongodb.messaging.config.MessagingProperties;
 import com.mzinx.mongodb.messaging.model.Message;
 import com.mzinx.mongodb.messaging.service.MessageService;
@@ -24,11 +25,14 @@ public class LiveDataListener implements ChangeStreamListener<Document> {
 	private final CodecRegistry pojoCodecRegistry;
 	private final MessageService messageService;
 	private final MessagingProperties messagingProperties;
+	private final CommandMessages commandMessages;
 
-	LiveDataListener(CodecRegistry pojoCodecRegistry, MessageService messageService, MessagingProperties messagingProperties) {
+	LiveDataListener(CodecRegistry pojoCodecRegistry, MessageService messageService,
+			MessagingProperties messagingProperties, CommandMessages commandMessages) {
 		this.pojoCodecRegistry = pojoCodecRegistry;
 		this.messageService = messageService;
 		this.messagingProperties = messagingProperties;
+		this.commandMessages = commandMessages;
 	}
 
     @Override
@@ -62,11 +66,6 @@ public class LiveDataListener implements ChangeStreamListener<Document> {
 						default:
 							break;
 					}
-					this.messageService.broadcast(Message.builder().target(messagingProperties.getCommandPath())
-							.content(
-									new Document("type", "REFRESH").append("coll",
-											event.getNamespace().getCollectionName()))
-							.build());
 				} catch (Exception ex) {
 					logger.error("Error publishing event.", ex);
 				}
