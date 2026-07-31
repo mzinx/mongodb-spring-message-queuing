@@ -10,6 +10,7 @@ A Spring Boot starter library that provides message queuing and real-time data s
 - **Change Stream Integration**: Leverages MongoDB change streams for real-time data updates
 - **Configurable Endpoints**: Customizable WebSocket endpoints and message paths
 - **TTL Message Management**: Automatic expiration of old messages
+- **STOMP Heartbeats**: Server-side heartbeats (on by default) so dead connections — including intermittent network drops — are detected within seconds
 - **Spring Integration**: Seamless integration with Spring Boot and WebSocket
 
 ## Installation
@@ -62,7 +63,21 @@ messaging.maxLifeTime=86400000
 
 # Collections to watch for live data changes (comma-separated list)
 messaging.watchCollections=users,orders,products
+
+# STOMP broker heartbeats (default: 10000 ms each direction). Heartbeats let the
+# server detect a dead connection — e.g. an intermittent network drop where no
+# clean close is received — within ~one interval, so a WebSocket
+# SessionDisconnectEvent fires promptly instead of waiting on OS-level TCP
+# timeouts. Set either to 0 to disable that direction (both 0 disables heartbeats).
+messaging.heartbeat.server-ms=10000
+messaging.heartbeat.client-ms=10000
 ```
+
+> **Heartbeat scheduler:** when heartbeats are enabled the library provides a
+> single-thread `TaskScheduler` bean named `messagingHeartbeatScheduler`. Define
+> your own bean of that name to use an existing scheduler instead. Client STOMP
+> libraries must also advertise matching heartbeats (e.g. stomp.js defaults to
+> 10 s/10 s) for the server to receive client-to-server pings.
 
 ## Usage
 
