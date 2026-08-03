@@ -30,7 +30,8 @@ public class MessageListener implements ChangeStreamListener<Document> {
 	}
 
 	@Override
-    public void onEvent(ChangeStreamDocument<Document> event) {
+    public void onEvent(String streamId, java.util.Map<String, Object> attributes,
+			ChangeStreamDocument<Document> event) {
 		try {
 			if (OperationType.INSERT == event.getOperationType()) {
 				Document fullDoc = event.getFullDocument();

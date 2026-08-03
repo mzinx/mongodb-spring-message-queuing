@@ -35,7 +35,8 @@ public class LiveDataListener implements ChangeStreamListener<Document> {
 	}
 
 	@Override
-	public void onEvent(ChangeStreamDocument<Document> event) {
+	public void onEvent(String streamId, java.util.Map<String, Object> attributes,
+			ChangeStreamDocument<Document> event) {
 		try {
 			logger.info("{} operation on Document {} in collection {}, send refresh command",
 					event.getOperationType().getValue(),
