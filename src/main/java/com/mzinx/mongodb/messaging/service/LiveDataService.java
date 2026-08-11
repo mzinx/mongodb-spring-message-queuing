@@ -37,6 +37,9 @@ public class LiveDataService {
 					.mode(Mode.BROADCAST) // BROADCAST, AUTO_RECOVER or AUTO_SCALE					
                 	.pipeline(List.of(new Document("$match", new Document("ns.coll",new Document("$in", messagingProperties.getWatchCollections())))))
 					.listener("liveDataListener") // ChangeStreamListener bean name
+					// WebSocket-bound: the liveDataListener bean + broker live in the
+					// business app, so this stream always runs there.
+					.runOn(ChangeStreamConfig.RunOn.BUSINESS)
 					.enabled(true)
 					.build());
 		}
