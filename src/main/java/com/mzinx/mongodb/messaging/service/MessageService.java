@@ -59,6 +59,10 @@ public class MessageService {
 				.mode(Mode.BROADCAST) // BROADCAST, AUTO_RECOVER or AUTO_SCALE
 				.pipeline(List.of())
 				.listener("messageListener") // ChangeStreamListener bean name
+				// WebSocket-bound: the messageListener bean + broker live in the
+				// business app, so this stream always runs there, never on the
+				// management console.
+				.runOn(ChangeStreamConfig.RunOn.BUSINESS)
 				.enabled(true)
 				.build());
 	}
