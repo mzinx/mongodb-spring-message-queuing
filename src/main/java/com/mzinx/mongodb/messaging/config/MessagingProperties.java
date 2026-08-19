@@ -36,15 +36,22 @@ public class MessagingProperties {
         /**
          * How often (ms) the server sends a heartbeat to clients. {@code 0}
          * disables server-to-client heartbeats.
+         *
+         * <p>Kept relatively relaxed (25s) so transient jitter — network hiccups,
+         * a paused/throttled client tab, GC stalls — is not mistaken for a dead
+         * connection and does not trigger a needless disconnect/reconnect cycle
+         * (which drops any events broadcast during the gap). Must stay aligned
+         * with the client's {@code heartbeatIncoming}.
          */
-        private long serverMs = 10000;
+        private long serverMs = 25000;
 
         /**
          * How often (ms) the server expects a heartbeat from clients. {@code 0}
          * disables the client-to-server expectation. A client that stops sending
-         * within this window has its STOMP session closed.
+         * within this window has its STOMP session closed. Must stay aligned with
+         * the client's {@code heartbeatOutgoing}.
          */
-        private long clientMs = 10000;
+        private long clientMs = 25000;
 
         /** {@code true} when either direction is enabled (non-zero). */
         public boolean isEnabled() {
